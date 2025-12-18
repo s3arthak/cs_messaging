@@ -6,6 +6,11 @@ import MessageList from "./components/MessageList";
 import MessageView from "./components/MessageView";
 import EmptyState from "./components/EmptyState";
 import Loading from "./components/Loading";
+import { io } from "socket.io-client";
+const SOCKET_URL =
+import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+const socket = io(SOCKET_URL);
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 export default function App() {
@@ -31,9 +36,19 @@ const [sortMode, setSortMode] = useState("time");
     return new Date(b.timestamp) - new Date(a.timestamp);
   }
 );
+
   useEffect(() => {
-    loadMessages();
-  }, []);
+  loadMessages();
+
+  socket.on("new-message", (message) => {
+    setMessages((prev) => [message, ...prev]);
+  });
+
+  return () => {
+    socket.off("new-message");
+  };
+}, []);
+
 
   const handleSelectMessage = async (message) => {
     setSelected(message);
@@ -86,6 +101,7 @@ const [sortMode, setSortMode] = useState("time");
           message={selected}
           replies={replies}
           setReplies={setReplies}
+          allMessages={messages}
         />
       ) : (
         <EmptyState />

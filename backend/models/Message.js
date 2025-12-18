@@ -15,5 +15,10 @@ const messageSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+messageSchema.index(
+  { userId: 1, body: 1, createdAt: 1 },
+  { unique: true }
+);
+
 
 export default mongoose.model("Message", messageSchema);

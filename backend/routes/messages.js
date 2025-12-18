@@ -5,25 +5,30 @@ import getUrgency from "../utils/urgency.js";
 
 const router = express.Router();
 
-/* GET messages with search */
+/* GET messages */
 router.get("/", async (req, res) => {
   const search = req.query.search || "";
 
   const messages = await Message.find({
-    body: { $regex: search, $options: "i" }   // ✅ FIX
+    body: { $regex: search, $options: "i" }
   }).sort({ urgency: -1, createdAt: -1 });
 
   res.json(messages);
 });
 
-/* Create message */
+/* Create messag */
 router.post("/", async (req, res) => {
-  const { body } = req.body;
+  const { body, userId } = req.body;
 
   const message = await Message.create({
     body,
+    userId,
     urgency: getUrgency(body)
   });
+
+  //  REAL-TIME 
+  const io = req.app.get("io");
+  io.emit("new-message", message);
 
   res.json(message);
 });
@@ -33,15 +38,18 @@ router.post("/:id/reply", async (req, res) => {
   const reply = await Reply.create({
     messageId: req.params.id,
     replyText: req.body.text,
-    agent: req.body.agent
+    agent: req.body.agent || "Agent"
   });
 
   res.json(reply);
 });
 
-/* Get replies */
+/* Get replies for a message */
 router.get("/:id/replies", async (req, res) => {
-  const replies = await Reply.find({ messageId: req.params.id });
+  const replies = await Reply.find({
+    messageId: req.params.id
+  });
+
   res.json(replies);
 });
 

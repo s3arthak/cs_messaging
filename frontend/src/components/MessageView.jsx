@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import { sendReply } from "../api";
+import CustomerInfo from "./CustomerInfo";
 
-export default function MessageView({ message, replies, setReplies }) {
+export default function MessageView({ message, replies, setReplies, allMessages }) {
   const [replyText, setReplyText] = useState("");
   const bottomRef = useRef(null);
 
@@ -16,9 +17,10 @@ export default function MessageView({ message, replies, setReplies }) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [replies]);
-
+   
   return (
     <div className="viewer">
+      <CustomerInfo message={message} allMessages={allMessages} />
       <div className="conversation">
         <div className="customer-message">
           <strong>User {message.userId}</strong>

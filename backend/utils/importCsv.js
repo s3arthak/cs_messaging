@@ -15,24 +15,41 @@ const CSV_PATH = path.join(
 );
 
 export async function importCsv() {
- console.log("CSV import started"); 
-  const messages = [];
+  console.log("CSV import started");
 
   return new Promise((resolve, reject) => {
     fs.createReadStream(CSV_PATH)
       .pipe(csv())
-      .on("data", (row) => {
-        messages.push({
-          userId: Number(row["User ID"]),
-          timestamp: new Date(row["Timestamp (UTC)"]),
-          body: row["Message Body"],
-          urgency: getUrgency(row["Message Body"])
-        });
+      .on("data", async (row) => {
+        const userId = Number(row["User ID"]);
+        const body = row["Message Body"];
+        const timestamp = new Date(row["Timestamp (UTC)"]);
+
+        try {
+          await Message.updateOne(
+            {
+              userId,
+              body,
+              timestamp
+            },
+            {
+              $setOnInsert: {
+                userId,
+                body,
+                urgency: getUrgency(body),
+                timestamp
+              }
+            },
+            {
+              upsert: true
+            }
+          );
+        } catch (err) {
+          // Ignore duplicted
+        }
       })
-      .on("end", async () => {
-        console.log("Total rows:", messages.length);
-        await Message.insertMany(messages, { ordered: false });
-        console.log(`Imported ${messages.length} messages`);
+      .on("end", () => {
+        console.log("CSV import finished (deduplicated)");
         resolve();
       })
       .on("error", reject);
