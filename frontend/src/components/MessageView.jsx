@@ -2,14 +2,17 @@ import React, { useState, useEffect, useRef } from "react";
 import { sendReply } from "../api";
 import CustomerInfo from "./CustomerInfo";
 
-export default function MessageView({ message, replies, setReplies, allMessages }) {
+export default function MessageView({ message, replies, setReplies, allMessages, agentName }) {
   const [replyText, setReplyText] = useState("");
   const bottomRef = useRef(null);
 
   async function handleSendReply() {
     if (!replyText.trim()) return;
-
-    const newReply = await sendReply(message._id, replyText);
+     const newReply = await sendReply(
+      message._id,
+      replyText,
+      agentName
+    );
     setReplies(prev => [...prev, newReply]);
     setReplyText("");
   }

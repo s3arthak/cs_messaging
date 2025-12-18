@@ -7,17 +7,21 @@ export async function getMessages(search = "") {
   return res.json();
 }
 
-export async function sendReply(messageId, text) {
+export async function sendReply(messageId, text, agent) {
   const res = await fetch(
     `${API_BASE_URL}/api/messages/${messageId}/reply`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text })
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ text, agent })
     }
   );
+
   return res.json();
 }
+
 
 export async function getReplies(messageId) {
   const res = await fetch(
