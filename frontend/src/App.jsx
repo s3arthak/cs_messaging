@@ -12,7 +12,7 @@ const API_BASE_URL =
 import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 function getAgentName() {
-  let agent = localStorage.getItem("agentName");
+  let agent = sessionStorage.getItem("agentName");
 
   if (!agent) {
     const agentId = Math.floor(Math.random() * 1000);
